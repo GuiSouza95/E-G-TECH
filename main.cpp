@@ -14,13 +14,15 @@
 
 #include <cctype>
 
+#include <stdlib.h>
+
 using namespace std;
 
-struct Stock{
+struct Stock {
     int cod_Produto;
-   string nome_Produto;
-   int stock_Produto;
-   double preco_Produto;
+    string nome_Produto;
+    int stock_Produto;
+    double preco_Produto;
 };
 
 //Estoque inicial
@@ -68,7 +70,7 @@ double lerQuantidadeDouble() {
         cin >> valor;
 
         if (cin.fail() || cin.peek() != '\n') {
-            cout << "Erro: Entrada invalida! Digite apenas numeros inteiros.\n";
+            cout << "Erro: Entrada invalida! Digite apenas numeros.\n";
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
@@ -90,9 +92,8 @@ double lerQuantidadeDouble() {
 bool nomeProdutoExistente(string nome) {
 
     for (const auto& s : produtos)
-
     {
-        if (s.nome_Produto == nome){
+        if (nome == s.nome_Produto) {
             return true;
         }
     }
@@ -101,32 +102,36 @@ bool nomeProdutoExistente(string nome) {
 }
 
 //Função para adicionar produtos
+int proximoID = 4;
 
 void adicionarProduto() {
 
     Stock novo;
 
+    system("clear||cls");
+
     cout << "\nAdicionar novo produto\n";
 
     cout << "---------------------------------" << endl;
 
-    do{
+    do {
 
         cout << "\nNome do produto: " << endl;
         cin >> novo.nome_Produto;
-        
+
         // --- BLOCO PARA TRANSFORMAR EM MAIUSCULA ---
-        for (auto &c : novo.nome_Produto) {
+        for (auto& c : novo.nome_Produto) {
             c = toupper(c);
         }
 
-        if (nomeProdutoExistente(novo.nome_Produto)){
+        if (nomeProdutoExistente(novo.nome_Produto)) {
             cout << "\nProduto ja existente! \n";
         }
 
     } while (nomeProdutoExistente(novo.nome_Produto));
 
-    novo.cod_Produto = produtos.size() + 1;
+    novo.cod_Produto = proximoID;
+    proximoID++;
 
     cout << "\nQuantidade inicial em stock: " << endl;
     novo.stock_Produto = lerQuantidade();
@@ -136,52 +141,38 @@ void adicionarProduto() {
 
     produtos.push_back(novo);
 
+    system("clear||cls");
+
     cout << "\nProduto adicionado com sucesso! \n";
 }
 
-//Função para editar produtos
+//Função para calcular preço de venda e IVA
 
-void editarProduto() {
-    int cod_Busca;
+double calculaPrecoVenda(double precoCusto) {
+    return precoCusto * 1.3;
+}
 
-    cout << "\nEditar produto existente\n";
+double calcularPrecoVendaIVA(double precoVenda) {
+    return precoVenda * 1.23;
+}
 
-    cout << "---------------------------------" << endl;
+//Função para listar produtos
 
-    bool encontrado = false;
+void listarProdutos() {
 
-    do
-    {
-        cout << "\nDigite o codigo do produto que deseja editar: " << endl;
-        cod_Busca = lerQuantidade();
+    system("clear||cls");
 
-        for (auto& produto : produtos) {
+    cout << "\nLista de Produtos Disponiveis:" << endl << endl;
 
-            if (cod_Busca == produto.cod_Produto) {
+    for (const auto& s : produtos) {
+        cout << "Codigo: " << s.cod_Produto;
+        cout << ", Nome: " << s.nome_Produto;
+        cout << ", Stock: " << s.stock_Produto;
 
-                encontrado = true;
+        double precoIVA = calcularPrecoVendaIVA(calculaPrecoVenda(s.preco_Produto));
 
-                cout << "\nNovo nome do produto: " << endl;
-                cin >> produto.nome_Produto;
-
-                // --- BLOCO PARA TRANSFORMAR EM MAIUSCULA ---
-                for (auto &c : produto.nome_Produto) {
-                    c = toupper(c);
-                }
-
-                cout << "\nNova quantidade em stock: " << endl;
-                produto.stock_Produto = lerQuantidade();
-
-                cout << "\nNovo preco de custo: " << endl;
-                produto.preco_Produto = lerQuantidadeDouble();
-
-                cout << "\n*** Produto editado com sucesso! ***" << endl;
-                return;
-            }
-        }
-
-        cout << "\nProduto com o codigo " << cod_Busca << " nao encontrado." << endl;
-    } while (encontrado == false);
+        cout << ", Preco: $" << precoIVA << endl;
+    }
 }
 
 //Função para deletar produtos
@@ -195,43 +186,35 @@ void deletarProduto() {
 
     bool encontrado = false;
 
-    //REVER ESSA FUNÇÃO DE DELETAR PRODUTOS
+    listarProdutos();
 
-    // do
-    // {
-    //     cout << "\nDigite o codigo do produto que deseja deletar: " << endl;
-    //     cod_Busca = lerQuantidade();
+    cout << "\nDigite o codigo do produto que deseja deletar: " << endl;
+    cod_Busca = lerQuantidade();
+    
+    do
+    {
+        system("clear||cls");
 
-    //     for (auto it = produtos.begin(); it != produtos.end(); ++it) {
+        for (auto it = produtos.begin(); it != produtos.end(); ++it) {
 
-    //         if (cod_Busca == it->cod_Produto) {
+            if (cod_Busca == it->cod_Produto) {
 
-    //             encontrado = true;
+                encontrado = true;
 
-    //             produtos.erase(it);
+                produtos.erase(it);
 
-    //             cout << "\n*** Produto deletado com sucesso! ***" << endl;
-    //             return;
-    //         }
-    //     }
+                cout << "\n*** Produto deletado com sucesso! ***" << endl;
+                return;
+            }
+        }
 
-    //     cout << "\nProduto com o codigo " << cod_Busca << " nao encontrado." << endl;
-    // } while (encontrado == false);
-}
-
-//Função para calcular preço de venda e IVA
-
-double calculaPrecoVenda(double precoCusto) {
-    return precoCusto * 1.3;
-}
-
-double calcularPrecoVendaIVA(double precoVenda) {
-    return precoVenda * 1.23;
+        cout << "\nProduto com o codigo " << cod_Busca << " nao encontrado." << endl;
+    } while (encontrado == false);
 }
 
 //Função para carrinho de compras
 
-struct Carrinho{
+struct Carrinho {
     int cod_Produto;
     string nome_Produto;
     int quantidade_Produto;
@@ -275,26 +258,85 @@ double totalCarrinho() {
     return total;
 }
 
-//Função para listar produtos
+//Função para editar produtos
 
-void listarProdutos() {
+void editarProduto() {
+    int cod_Busca;
 
-    cout << "\nLista de Produtos Disponiveis:" << endl << endl;
+    cout << "\nEditar produto existente\n";
 
-    for (const auto& s : produtos) {
-        cout << "Codigo: " << s.cod_Produto;
-        cout << ", Nome: " << s.nome_Produto;
-        cout << ", Stock: " << s.stock_Produto;
+    cout << "---------------------------------" << endl;
 
-        double precoIVA = calcularPrecoVendaIVA(calculaPrecoVenda(s.preco_Produto));
+    listarProdutos();
 
-        cout << ", Preco: $" << precoIVA << endl;
+    bool encontrado = false;
+
+    do
+    {
+        cout << "\nDigite o codigo do produto que deseja editar: " << endl;
+        cod_Busca = lerQuantidade();
+
+        for (auto& produto : produtos) {
+
+            if (cod_Busca == produto.cod_Produto) {
+
+                encontrado = true;
+                string novoNome;
+
+                do {
+                    cout << "\nDigite o novo nome do produto: " << endl;
+                    cin >> novoNome;
+
+                    // --- BLOCO PARA TRANSFORMAR EM MAIUSCULA ---
+                    for (auto& c : novoNome) {
+                        c = toupper(c);
+                    }
+
+                    if (nomeProdutoExistente(novoNome) == true) {
+                        cout << "\nProduto ja existente! \n";
+                    }
+
+                } while (nomeProdutoExistente(novoNome));
+
+                produto.nome_Produto = novoNome;
+
+                cout << "\nNova quantidade em stock: " << endl;
+                produto.stock_Produto = lerQuantidade();
+
+                cout << "\nNovo preco de custo: " << endl;
+                produto.preco_Produto = lerQuantidadeDouble();
+
+                cout << "\n*** Produto editado com sucesso! ***" << endl;
+
+                system("clear||cls");
+
+                return;
+            }
+        }
+
+        cout << "\nProduto com o codigo " << cod_Busca << " nao encontrado." << endl;
+    } while (encontrado == false);
+}
+
+//Função para desfazer carrinho
+
+void devolverProduto() {
+
+    if (itemCarrinho.empty()) {
+        cout << "\nCarrinho vazio. Nao ha produtos para devolver." << endl;
+        return;
     }
 
-    cout << "\nPressione Enter para escolher o produto..." << endl;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    for (const auto& item : itemCarrinho) {
+        for (auto& p : produtos) {
+            if (p.cod_Produto == item.cod_Produto) {
+                p.stock_Produto += item.quantidade_Produto;
+                break;
+            }
+        }
+    }
 
-    cin.get();
+    itemCarrinho.clear();
 }
 
 //Função para vender produtos
@@ -303,13 +345,25 @@ void venderProduto() {
 
     listarProdutos();
 
+    cout << "\nTotal no carrinho: $" << totalCarrinho() << endl;
+
+    cout << "\nPressione Enter para escolher o produto..." << endl;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    cin.get();
+
     int cod_Busca, qtd_Desejada;
 
     do {
         cout << "\nDigite o codigo do produto que deseja comprar (0 para sair): " << endl;
         cod_Busca = lerQuantidade();
 
-        if (cod_Busca == 0){
+        if (cod_Busca == 0) {
+
+            devolverProduto();
+
+            system("clear||cls");
+
             return;
         }
 
@@ -320,6 +374,11 @@ void venderProduto() {
             if (cod_Busca == produto.cod_Produto) {
                 encontrado = true;
 
+                if (produto.stock_Produto == 0) {
+                    cout << "Produto sem stock disponivel." << endl;
+                    break;
+                }
+
                 do {
                     cout << "\nDigite a quantidade que deseja comprar (stock atual: " << produto.stock_Produto << "): " << endl;
                     qtd_Desejada = lerQuantidade();
@@ -327,8 +386,14 @@ void venderProduto() {
                     if (qtd_Desejada > produto.stock_Produto) {
                         cout << "Quantidade solicitada excede o stock disponivel." << endl;
                     }
+                    else if (qtd_Desejada == 0)
+                    {
+                        cout << "Quantidade solicitada invalida." << endl;
+                    }
 
-                } while (qtd_Desejada > produto.stock_Produto);
+                } while (qtd_Desejada > produto.stock_Produto || qtd_Desejada == 0);
+
+                produto.stock_Produto -= qtd_Desejada;
 
                 Carrinho novoItem;
 
@@ -348,8 +413,11 @@ void venderProduto() {
                 cin >> continuar;
 
                 if (continuar == 1) {
-                  venderProduto();
-                }else {
+                    venderProduto();
+                }
+                else {
+
+                    system("clear||cls");
 
                     listarCarrinho();
 
@@ -358,89 +426,104 @@ void venderProduto() {
 
                     if (opcao != 0) {
                         venderProduto();
-                    }else {
- 
+                    }
+                    else {
+
+                        system("clear||cls");
+
                         if (!itemCarrinho.empty()) {
- 
+
                             listarCarrinho();
- 
+
                             cout << "\nDeseja realizar pagamento? (1 - Sim / 0 - Cancelar tudo)" << endl;
                             int confirmar = lerQuantidade();
- 
+
                             if (confirmar == 1) {
- 
-                            double totalGeral = totalCarrinho();                                 
-                                 
-                            double valorPago = 0;
-                            double troco = 0;
- 
-                            int sorteio = rand() % 100 + 1;
-       
-                            if (sorteio == 7) {
-                                cout << "\n***********************************" << endl;
-                                cout << "PARABENS! Voce foi sorteado!" << endl;
-                                cout << "Esta venda e por conta da casa (Total: $0.00)" << endl;
-                                cout << "***********************************" << endl;
-                                totalGeral = 0; // Zera o total para o recibo e pagamento
-                            }
- 
-                            if (totalGeral > 0) {
-                                cout << "Valor entregue pelo cliente: ";
 
-                                do
-                                {
-                                    valorPago = lerQuantidadeDouble();
-                                    if(valorPago < totalGeral) cout << "Valor insuficiente! Insira um novo valor\n";
-                                } while (valorPago < totalGeral);
+                                double totalGeral = totalCarrinho();
 
-                                troco = valorPago - totalGeral;
+                                double valorPago = 0;
+                                double troco = 0;
 
-                                cout << "\nTroco: " << troco << " euros\n";
-                            }
- 
-                            cout << "\nDeseja fatura? (1 - Sim / 0 - Nao)" << endl;
- 
-                            if (lerQuantidade() == 1) {
+                                int sorteio = rand() % 100 + 1;
 
-                                int contadorVenda = 1;
-
-                                cout << "Inserir NIF: ";
-                                int NIF = lerQuantidade();
-
-                                cout << "\n-------------------------------\n";
-                                cout << "        RECIBO DE VENDA        \n";
-                                cout << "-------------------------------\n";
-                                cout << "Numero de fatura: FT0026" << contadorVenda << endl;
-                                cout << "NIF Cliente: " << NIF << endl;
-
-                                time_t agora = time(0);
-                                char* dt = ctime(&agora);
-                                cout << "Data e hora: " << dt;
-
-                                cout << "-------------------------------\n";
-                                listarCarrinho();
-                                cout << "-------------------------------\n";
-                                cout << "Total a pagar: " << totalGeral << " euros\n";
-                                cout << "Valor entregue: " << valorPago << " euros\n";
-                                cout << "Troco: " << troco << " euros\n";
-                                cout << "Obrigado e volte sempre!\n";
-                            }
-
-                            for (const auto& item : itemCarrinho) {
-
-                                for (auto& p : produtos) {
-                                    if (p.cod_Produto == item.cod_Produto) p.stock_Produto -= item.quantidade_Produto;
+                                if (sorteio == 7) {
+                                    cout << "\n***********************************" << endl;
+                                    cout << "PARABENS! Voce foi sorteado!" << endl;
+                                    cout << "Esta venda e por conta da casa (Total: $0.00)" << endl;
+                                    cout << "***********************************" << endl;
+                                    totalGeral = 0; // Zera o total para o recibo e pagamento
                                 }
+
+                                if (totalGeral > 0) {
+                                    cout << "Valor entregue pelo cliente: ";
+
+                                    do
+                                    {
+                                        valorPago = lerQuantidadeDouble();
+                                        if (valorPago < totalGeral) cout << "Valor insuficiente! Insira um novo valor\n";
+                                    } while (valorPago < totalGeral);
+
+                                    troco = valorPago - totalGeral;
+
+                                    cout << "\nTroco: " << troco << " euros\n";
+                                }
+
+                                cout << "\nDeseja fatura? (1 - Sim / 0 - Nao)" << endl;
+
+                                if (lerQuantidade() == 1) {
+
+                                    int contadorVenda = 1;
+
+                                    cout << "Inserir NIF: ";
+                                    int NIF = lerQuantidade();
+
+                                    system("clear||cls");
+
+                                    cout << "\n-------------------------------\n";
+                                    cout << "        RECIBO DE VENDA        \n";
+                                    cout << "-------------------------------\n";
+                                    cout << "Numero de fatura: FT0026" << contadorVenda << endl;
+                                    cout << "NIF Cliente: " << NIF << endl;
+
+                                    time_t agora = time(0);
+                                    char* dt = ctime(&agora);
+                                    cout << "Data e hora: " << dt;
+
+                                    cout << "-------------------------------\n";
+                                    listarCarrinho();
+                                    cout << "-------------------------------\n";
+                                    cout << "Total a pagar: " << totalGeral << " euros\n";
+                                    cout << "Valor entregue: " << valorPago << " euros\n";
+                                    cout << "Troco: " << troco << " euros\n";
+                                    cout << "Obrigado e volte sempre!\n" << endl;
+
+                                    cout << "\nPressione Enter para voltar ao menu..." << endl;
+                                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                                    cin.get();
+                                    system("clear||cls");
+                                }
+                                else {
+                                    system("clear||cls");
+                                }
+
+                                itemCarrinho.clear();
+
                             }
-                            itemCarrinho.clear();
+                            else {
+
+                                system("clear||cls");
+                                devolverProduto();
+                                cout << "\nCompra cancelada. Produtos devolvidos ao stock." << endl;
+                            }
                         }
-                    }}
+                    }
                 }
                 return;
             }
         }
 
-        if (!encontrado){
+        if (!encontrado) {
             cout << "\nProduto com o codigo " << cod_Busca << " nao encontrado." << endl;
         }
 
@@ -449,53 +532,90 @@ void venderProduto() {
 
 //Função do menu de produtos
 
-void menuProdutos(){
+void menuProdutos() {
+
+    system("clear||cls");
+
     int escolha;
 
     do {
-        
+
         cout << "-------------------------------\n";
         cout << "Vendinha do E&G TECH" << endl;
         cout << "\n--- MENU PRODUTOS ---" << endl;
-        cout << "1 - Editar produto \n2 - Adicionar produto \n3 - Deletar produto \n0 - Sair\n";
+        cout << "1 - Editar produto \n2 - Adicionar produto \n3 - Deletar produto \n4 - Ver Stock \n0 - Sair\n";
         cout << "-------------------------------\n";
         escolha = lerQuantidade();
-        
+
         switch (escolha)
         {
-            case 1:
-                editarProduto();
-                break;
-            
-            case 2:
-                adicionarProduto();
-                break;
+        case 1:
+            editarProduto();
+            break;
 
-            case 3:
-                deletarProduto();
-                break;
+        case 2:
+            adicionarProduto();
+            break;
 
-            case 0:
-                cout << "Sair" << endl;
-                break;
-            
-            default:
-                cout << "Opcao invalida." << endl;
-                break;
+        case 3:
+            deletarProduto();
+            break;
+
+        case 4:
+            listarProdutos();
+
+            cout << "\nPressione Enter para voltar ao menu..." << endl;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin.get();
+
+            system("clear||cls");
+
+            break;
+
+        case 0:
+            cout << "Sair" << endl;
+            break;
+
+        default:
+            cout << "Opcao invalida." << endl;
+            break;
         }
     } while (escolha != 0);
+
+    system("clear||cls");
 }
-    
+
 void menuPrincipal(int Op) {
 
     switch (Op) {
 
-    case 1: 
+    case 1:
         venderProduto();
         break;
 
     case 2:
         menuProdutos();
+        break;
+
+    case 3:
+        system ("clear||cls");
+
+        cout << "-------------------------------\n";
+
+        cout << "\nContactos da Vendinha do E&G TECH:" << endl;
+
+        cout << "\nTelefone: +351 910 949 582" << endl;
+        cout << "Telefone: +351 910 391 557" << endl;
+        cout << "\nEmail: Emerson.Ribeiro.T0133595@edu.atec.pt " << endl << "Email: Guilherme.Souza.T0133598@edu.atec.pt" << endl;
+
+        cout << "\n-------------------------------\n";
+
+        cout << "\nPressione Enter para voltar ao menu..." << endl;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cin.get();
+
+        system("clear||cls");
+
         break;
 
     case 0:
@@ -518,7 +638,7 @@ int main() {
         cout << "-------------------------------\n";
         cout << "Vendinha do E&G TECH" << endl;
         cout << "\n--- MENU PRINCIPAL ---" << endl;
-        cout << "1 - Venda \n2 - Produtos \n0 - Sair\n";
+        cout << "1 - Venda \n2 - Produtos \n3 - Contactos \n0 - Sair\n";
         cout << "-------------------------------\n";
         Op = lerQuantidade();
 
